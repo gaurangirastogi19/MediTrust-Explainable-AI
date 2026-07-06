@@ -19,4 +19,10 @@ Medi-Trust is an end-to-end Machine Learning system that predicts health risks w
 1\. Install requirements: `pip install -r requirements.txt`
 
 2\. Run app: `streamlit run app.py`
+## 📊 Project Preview
 
+| Healthy Case (Low Risk) | High Risk Case (Detected) |
+| :---: | :---: |
+| ![Healthy Case](healthy_case.png) | ![Risk Case](risk_case.png) |
+
+> **Note:** The SHAP visualization explains how each health metric contributes to the final prediction. Blue bars indicate protective factors, while red bars indicate risk factors.
