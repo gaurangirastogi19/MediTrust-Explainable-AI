@@ -8,7 +8,7 @@ from sklearn.ensemble import RandomForestClassifier
 # --- PAGE SETUP ---
 st.set_page_config(page_title="Medi-Trust AI", layout="wide")
 
-# --- MODEL TRAINING (Dummy Data for Demo) ---
+# --- MODEL TRAINING ---
 @st.cache_resource
 def train_model():
     np.random.seed(42)
@@ -40,7 +40,6 @@ user_input = pd.DataFrame([[glucose, bmi, age, bp, insulin]], columns=X_train.co
 
 if st.button("Analyze Health Risk"):
     prob = model.predict_proba(user_input)[0][1]
-    
     col1, col2 = st.columns(2)
     
     with col1:
@@ -49,16 +48,22 @@ if st.button("Analyze Health Risk"):
             st.error(f"High Risk Detected ({prob*100:.1f}%)")
         else:
             st.success(f"Low Risk / Healthy ({prob*100:.1f}%)")
+        st.write("---")
+        st.info("Red bars below mean that factor increased risk, Blue means it decreased risk.")
             
     with col2:
-        st.subheader("Explainable AI (SHAP)")
+        st.subheader("💡 Why this prediction?")
         explainer = shap.TreeExplainer(model)
         shap_values = explainer.shap_values(user_input)
         
-        # Simple Visualization
+        if isinstance(shap_values, list):
+            vals = shap_values[1][0]
+        else:
+            vals = shap_values[0, :, 1] if len(shap_values.shape) == 3 else shap_values[0]
+
         fig, ax = plt.subplots()
-        importance = pd.Series(shap_values[1][0], index=X_train.columns)
-        importance.plot(kind='barh', color='salmon')
-        plt.title("Feature Impact on Prediction")
-        st.pyplot(fig)
-        st.info("The bars show which factors (like Glucose or BMI) pushed the AI toward this result.")
+        colors = ['red' if x > 0 else 'blue' for x in vals]
+        pd.Series(vals, index=X_train.columns).plot(kind='barh', color=colors, ax=ax)
+        plt.axvline(x=0, color='black', linestyle='-', linewidth=0.5)
+        plt.title("Impact of Health Factors")
+        st.pyplot(fig
